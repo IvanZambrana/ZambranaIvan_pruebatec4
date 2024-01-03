@@ -1,5 +1,6 @@
 package com.izambrana.pruebatec4.controller;
 
+import com.izambrana.pruebatec4.dto.HotelWithRoomsDTO;
 import com.izambrana.pruebatec4.model.Hotel;
 import com.izambrana.pruebatec4.service.IHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +15,21 @@ public class HotelController {
     @Autowired
     IHotelService hotelService;
 
+    //Listar hoteles
     @GetMapping("/hotels")
     public List<Hotel> getHotels(){
         return  hotelService.getHotels();
     }
 
+    //Crear hoteles con habitaciones
     @PostMapping("/hotels/new")
+    public String saveHotelWithRooms(@RequestBody HotelWithRoomsDTO hotelWithRoomsDTO) {
+        hotelService.saveHotelWithRooms(hotelWithRoomsDTO);
+        return "Hotel and rooms saved successfully";
+    }
+
+    //Crear hoteles sin habitaciones asociadas
+    @PostMapping("/hotels/new/blank")
     public String saveHotel(@RequestBody Hotel hotel){
         hotelService.saveHotel(hotel);
         return "Hotel saved succesfully";

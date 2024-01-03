@@ -6,21 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Hotel {
+public class HotelRoom {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String hotelCode;
-    private String name;
-    private String city;
+    private int roomNumber;
+    private String roomType;
+    private double price;
 
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
-    private List<HotelRoom> rooms;
+    @ManyToOne
+    @JoinColumn(name = "hotel_id")
+    private Hotel hotel;
 }
