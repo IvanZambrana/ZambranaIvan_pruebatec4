@@ -2,6 +2,7 @@ package com.izambrana.pruebatec4.controller;
 
 import com.izambrana.pruebatec4.dto.HotelWithRoomsDTO;
 import com.izambrana.pruebatec4.model.Hotel;
+import com.izambrana.pruebatec4.dto.HotelBookingRequestDTO;
 import com.izambrana.pruebatec4.service.IHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,7 @@ import java.util.List;
 public class HotelController {
 
     @Autowired
-    IHotelService hotelService;
+    private IHotelService hotelService;
 
     //Listar hoteles
     @GetMapping("/hotels")
@@ -62,4 +63,11 @@ public class HotelController {
         hotelService.deleteHotel(id);
         return "Hotel deleted succesfully";
     }
+
+    // Reservar habitaciones de hotel
+    /*@PostMapping("/hotel-booking/new")
+    public String bookHotel(@RequestBody HotelBookingRequestDTO hotel) throws Exception {
+        Double totalPrice = hotelService.bookHotel(hotel);
+        return "Total price: " + totalPrice + " $";
+    }*/
 }

@@ -3,8 +3,11 @@ package com.izambrana.pruebatec4.controller;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.izambrana.pruebatec4.dto.FlightWithSeatDTO;
 import com.izambrana.pruebatec4.model.Flight;
+import com.izambrana.pruebatec4.dto.FlightBookingRequestDTO;
 import com.izambrana.pruebatec4.service.IFlightService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -16,6 +19,7 @@ public class FlightController {
 
     @Autowired
     private IFlightService flightService;
+
 
     //Listar vuelos
     @GetMapping("/flights")
@@ -66,5 +70,35 @@ public class FlightController {
     public String deleteFlight(@PathVariable Long id){
         flightService.deleteFlight(id);
         return "Flight deleted succesfully";
+    }
+
+    //Mostrar vuelos por rango de fechas, origen y destino
+    @GetMapping("/flights/search")
+    public List<Flight> getFlightsByDateAndDestination(
+            @RequestParam("dateFrom") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dateFrom,
+            @RequestParam("dateTo") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate dateTo,
+            @RequestParam("origin") String origin,
+            @RequestParam("destination") String destination) {
+
+        return flightService.getFlightsByDateAndDestination(dateFrom, dateTo, origin, destination);
+    }
+
+    //Reservar un vuelo
+   /* @PostMapping("flight-booking/new")
+    public String bookFlight(@RequestBody BookFlight bookFlight) {
+        Double totalPrice = flightService.bookFlight(bookFlight);
+
+        return "Total price: " + totalPrice + " $";
+    }*/
+// Reservar un vuelo
+    @PostMapping("flight-booking/new")
+    public ResponseEntity<String> bookFlight(@RequestBody FlightBookingRequestDTO request) {
+        try {
+            Double totalPrice = flightService.bookFlight(request);
+
+            return ResponseEntity.ok("Total price: " + totalPrice + " $");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

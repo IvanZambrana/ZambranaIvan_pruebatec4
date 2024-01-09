@@ -1,6 +1,7 @@
 package com.izambrana.pruebatec4.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,12 +19,14 @@ public class Flight {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String flightCode;
     private String origin;
     private String destination;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate departureDate;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
     private List<FlightSeat> seats;
 }

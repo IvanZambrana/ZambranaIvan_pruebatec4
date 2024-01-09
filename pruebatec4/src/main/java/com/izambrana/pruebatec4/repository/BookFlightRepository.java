@@ -1,10 +1,9 @@
 package com.izambrana.pruebatec4.repository;
 
-import com.izambrana.pruebatec4.model.Hotel;
+import com.izambrana.pruebatec4.model.BookFlight;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface HotelRepository  extends JpaRepository<Hotel, Long> {
-    Hotel findByHotelCode(String hotelCode);
+public interface BookFlightRepository   extends JpaRepository<BookFlight, Long> {
 }
