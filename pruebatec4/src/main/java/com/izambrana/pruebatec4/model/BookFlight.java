@@ -1,7 +1,5 @@
 package com.izambrana.pruebatec4.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +20,6 @@ public class BookFlight {
     private Long id;
 
 
-    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "flight_id")
     private Flight flight;
@@ -33,7 +30,6 @@ public class BookFlight {
     private int peopleQ;
     private String seatType;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "bookFlight", cascade = CascadeType.ALL)
+    @ManyToMany
     private List<User> passengers;
 }

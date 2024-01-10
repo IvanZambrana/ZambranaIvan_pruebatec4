@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter @Setter
 @AllArgsConstructor
@@ -16,4 +17,5 @@ public class FlightBookingRequestDTO {
     private LocalDate date;
     private int peopleQ;
     private String seatType;
+    private List<GuestDTO> passengers;
 }

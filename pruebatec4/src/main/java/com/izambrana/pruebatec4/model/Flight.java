@@ -1,7 +1,7 @@
 package com.izambrana.pruebatec4.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,7 +26,7 @@ public class Flight {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate departureDate;
 
-    @JsonManagedReference
+    @JsonIgnore
     @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
     private List<FlightSeat> seats;
 }

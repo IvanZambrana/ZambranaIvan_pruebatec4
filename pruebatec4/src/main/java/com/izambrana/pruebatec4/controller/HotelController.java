@@ -3,10 +3,17 @@ package com.izambrana.pruebatec4.controller;
 import com.izambrana.pruebatec4.dto.HotelWithRoomsDTO;
 import com.izambrana.pruebatec4.model.Hotel;
 import com.izambrana.pruebatec4.dto.HotelBookingRequestDTO;
+import com.izambrana.pruebatec4.repository.BookHotelRepository;
 import com.izambrana.pruebatec4.service.IHotelService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -18,8 +25,8 @@ public class HotelController {
 
     //Listar hoteles
     @GetMapping("/hotels")
-    public List<Hotel> getHotels(){
-        return  hotelService.getHotels();
+    public List<Hotel> getHotels() {
+        return hotelService.getHotels();
     }
 
     //Crear hoteles con habitaciones
@@ -29,15 +36,8 @@ public class HotelController {
         return "Hotel and rooms saved successfully";
     }
 
-    //Crear hoteles sin habitaciones asociadas
-    @PostMapping("/hotels/new/blank")
-    public String saveHotel(@RequestBody Hotel hotel){
-        hotelService.saveHotel(hotel);
-        return "Hotel saved succesfully";
-    }
-
     @GetMapping("/hotels/{id}")
-    public Hotel getHotelById(@PathVariable Long id){
+    public Hotel getHotelById(@PathVariable Long id) {
         return hotelService.getHotelById(id);
     }
 
@@ -45,7 +45,7 @@ public class HotelController {
     public Hotel editHotel(@PathVariable Long id,
                            @RequestParam String hotelCode,
                            @RequestParam String hotelName,
-                           @RequestParam String city){
+                           @RequestParam String city) {
 
         Hotel hotel = hotelService.getHotelById(id);
 
@@ -59,15 +59,44 @@ public class HotelController {
     }
 
     @DeleteMapping("/hotels/delete/{id}")
-    public String deleteHotel(@PathVariable Long id){
+    public String deleteHotel(@PathVariable Long id) {
         hotelService.deleteHotel(id);
         return "Hotel deleted succesfully";
     }
 
-    // Reservar habitaciones de hotel
-    /*@PostMapping("/hotel-booking/new")
-    public String bookHotel(@RequestBody HotelBookingRequestDTO hotel) throws Exception {
-        Double totalPrice = hotelService.bookHotel(hotel);
-        return "Total price: " + totalPrice + " $";
-    }*/
+    // Reservar un hotel
+    @PostMapping("hotel-booking/new")
+    public ResponseEntity<String> bookHotel(@RequestBody HotelBookingRequestDTO request) throws Exception {
+        Double totalPrice = hotelService.bookHotel(request);
+
+        return ResponseEntity.ok("Total price: " + totalPrice + " $");
+
+    }
+
+    // Eliminar una reserva de hotel por ID
+    @DeleteMapping("hotel-booking/delete/{id}")
+    public ResponseEntity<String> deleteBookedHotel(@PathVariable Long id) {
+        try {
+            hotelService.deleteBookedHotel(id);
+            return ResponseEntity.ok("Reserva de hotel eliminada con éxito");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No hotels reservations found with ID: " + id);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting hotel reservation: " + e.getMessage());
+        }
+    }
+
+
+    //Buscar hotel por destino si quedan habitaciones disponibles
+    @GetMapping("/hotel/search")
+    public ResponseEntity<List<Hotel>> getHotelsByDestination(
+            @RequestParam("destination") String destination) {
+        try {
+            List<Hotel> hotels = hotelService.getHotelsByCity(destination);
+            return ResponseEntity.ok(hotels);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+    }
+
 }

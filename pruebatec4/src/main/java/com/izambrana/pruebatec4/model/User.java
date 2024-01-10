@@ -1,12 +1,13 @@
 package com.izambrana.pruebatec4.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,16 +20,14 @@ public class User {
     private Long Id;
 
     private String name;
-    private String surname;
+    private String lastName;
+    private String docId;
 
-    @JsonBackReference
-    @ManyToOne
-    @JoinColumn(name = "book_flight_id")
-    private BookFlight bookFlight;
+    @ManyToMany(mappedBy = "passengers", cascade = CascadeType.ALL)
+    private List<BookFlight> bookFlights = new ArrayList<>();
 
 
-    @JsonBackReference
-    @ManyToOne
-    @JoinColumn(name = "book_hotel_id")
-    private BookHotel bookHotel;
+
+    @ManyToMany(mappedBy = "guests", cascade = CascadeType.ALL)
+    private List<BookHotel> hotels = new ArrayList<>();
 }

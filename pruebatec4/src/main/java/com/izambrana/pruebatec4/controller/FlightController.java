@@ -5,8 +5,10 @@ import com.izambrana.pruebatec4.dto.FlightWithSeatDTO;
 import com.izambrana.pruebatec4.model.Flight;
 import com.izambrana.pruebatec4.dto.FlightBookingRequestDTO;
 import com.izambrana.pruebatec4.service.IFlightService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,27 +25,21 @@ public class FlightController {
 
     //Listar vuelos
     @GetMapping("/flights")
-    public List<Flight> getFlights(){
+    public List<Flight> getFlights() {
         return flightService.getFlights();
     }
 
     //Crear vuelos con asientos
     @PostMapping("/flights/new")
-    public String saveFlightWithSeats(@RequestBody FlightWithSeatDTO flightWithSeatDTO){
+    public String saveFlightWithSeats(@RequestBody FlightWithSeatDTO flightWithSeatDTO) {
         flightService.saveFlightWithSeats(flightWithSeatDTO);
         return "Flight and seats saved succesfully";
     }
 
-    //Crear vuelos sin asientos asociados
-    @PostMapping("/flights/new/blank")
-    public String saveFlight(@RequestBody Flight flight){
-        flightService.saveFlight(flight);
-        return "Flight saved succesfully";
-    }
 
     //Mostrar info de un vuelo concreto
     @GetMapping("/flights/{id}")
-    public Flight getFlightById(@PathVariable Long id){
+    public Flight getFlightById(@PathVariable Long id) {
         return flightService.getFlightById(id);
     }
 
@@ -53,7 +49,7 @@ public class FlightController {
                              @RequestParam String flightCode,
                              @RequestParam String origin,
                              @RequestParam String destination,
-                             @RequestParam @JsonFormat(pattern = "yyyy-MM-dd") LocalDate departureDate){
+                             @RequestParam @JsonFormat(pattern = "yyyy-MM-dd") LocalDate departureDate) {
         Flight flight = flightService.getFlightById(id);
 
         flight.setFlightCode(flightCode);
@@ -67,7 +63,7 @@ public class FlightController {
 
     //Eliminar un vuelo
     @DeleteMapping("/flights/delete/{id}")
-    public String deleteFlight(@PathVariable Long id){
+    public String deleteFlight(@PathVariable Long id) {
         flightService.deleteFlight(id);
         return "Flight deleted succesfully";
     }
@@ -83,22 +79,27 @@ public class FlightController {
         return flightService.getFlightsByDateAndDestination(dateFrom, dateTo, origin, destination);
     }
 
-    //Reservar un vuelo
-   /* @PostMapping("flight-booking/new")
-    public String bookFlight(@RequestBody BookFlight bookFlight) {
-        Double totalPrice = flightService.bookFlight(bookFlight);
 
-        return "Total price: " + totalPrice + " $";
-    }*/
-// Reservar un vuelo
+    // Reservar un vuelo
     @PostMapping("flight-booking/new")
-    public ResponseEntity<String> bookFlight(@RequestBody FlightBookingRequestDTO request) {
-        try {
-            Double totalPrice = flightService.bookFlight(request);
+    public ResponseEntity<String> bookFlight(@RequestBody FlightBookingRequestDTO request) throws Exception {
 
-            return ResponseEntity.ok("Total price: " + totalPrice + " $");
+        Double totalPrice = flightService.bookFlight(request);
+
+        return ResponseEntity.ok("Total price: " + totalPrice + " $");
+    }
+
+    //Eliminar una reserva de vuelo
+    @DeleteMapping("flight-booking/delete/{id}")
+    public ResponseEntity<String> deleteBookedFlight(@PathVariable Long id) {
+        try {
+            flightService.deleteBookedFlight(id);
+            return ResponseEntity.ok("Flight reservation deleted successfully");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No flight reservations found with ID: " + id);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting flight reservation: " + e.getMessage());
         }
     }
+
 }

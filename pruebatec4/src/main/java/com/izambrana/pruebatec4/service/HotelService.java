@@ -1,15 +1,24 @@
 package com.izambrana.pruebatec4.service;
 
+import com.izambrana.pruebatec4.dto.GuestDTO;
 import com.izambrana.pruebatec4.dto.HotelBookingRequestDTO;
 import com.izambrana.pruebatec4.dto.HotelWithRoomsDTO;
 import com.izambrana.pruebatec4.model.*;
 import com.izambrana.pruebatec4.repository.BookHotelRepository;
 import com.izambrana.pruebatec4.repository.HotelRepository;
 import com.izambrana.pruebatec4.repository.HotelRoomRepository;
+import com.izambrana.pruebatec4.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class HotelService implements IHotelService {
@@ -22,6 +31,9 @@ public class HotelService implements IHotelService {
 
     @Autowired
     BookHotelRepository bookHotelRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Override
     public void saveHotel(Hotel hotel) {
@@ -40,7 +52,6 @@ public class HotelService implements IHotelService {
         for (HotelRoom room : rooms) {
             room.setAvailable(true); //Todas las habitaciones que se agregan empiezan como disponibles para su reserva
             room.setHotel(hotel);
-            //room.setReservations(null);
             hotelRoomRepository.save(room);
         }
     }
@@ -56,6 +67,24 @@ public class HotelService implements IHotelService {
     }
 
     @Override
+    public List<Hotel> getHotelsByCity(String city) {
+        List<Hotel> hotels = hotelRepository.findByCity(city);
+
+        return hotels.stream()
+                .map(hotel -> {
+                    boolean hasAvailableRooms = hotel.getRooms().stream()
+                            .anyMatch(room -> room.isAvailable());
+
+                    if(hasAvailableRooms)
+                        return hotel;
+                    else
+                        return null;
+                })
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
     public void deleteHotel(Long id) {
         hotelRepository.deleteById(id);
     }
@@ -63,12 +92,12 @@ public class HotelService implements IHotelService {
 
     @Override
     public Double bookHotel(HotelBookingRequestDTO request) throws Exception {
-        // Buscar el hotel por código o alguna otra identificación
+        // Buscar el hotel por código
         Hotel hotel = hotelRepository.findByHotelCode(request.getHotelCode());
 
 
         if (hotel == null) {
-            throw new Exception("No hotels found");
+            throw new Exception("Hotel not found");
         }
 
         // Obtener la lista de habitaciones disponibles según el tipo y fechas especificadas
@@ -93,16 +122,59 @@ public class HotelService implements IHotelService {
         bookHotel.setEndDate(request.getEndDate());
         bookHotel.setPeopleQ(request.getPeopleQ());
         bookHotel.setRoom(bookedRoom);
+
+
+        // Establecer la relación bidireccional con húespedes
+        bookHotel.setGuests(new ArrayList<>());
+
+        for (GuestDTO guestDTO : request.getGuests()) {
+            User guest = new User();
+            guest.setName(guestDTO.getName());
+            guest.setLastName(guestDTO.getLastName());
+            guest.setDocId(guestDTO.getDocId());
+            bookHotel.getGuests().add(guest);
+        }
+
         bookHotelRepository.save(bookHotel);
 
+        // Actualizar la relación bidireccional en la lista de hoteles de cada usuario
+        for (User guest : bookHotel.getGuests()) {
+            guest.getHotels().add(bookHotel);
+            userRepository.save(guest);
+        }
+
+
+        // Calcular el número de días de estancia
+        long numberOfDays = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate());
+
+
         //Se devuelve el precio total
-        return calculateTotalPrice(request.getPeopleQ(), bookedRoom.getPrice());
+        return calculateTotalPrice(request.getPeopleQ(), bookedRoom.getPrice(), numberOfDays);
 
     }
 
+    @Override
+    public void deleteBookedHotel(Long id) {
+        try {
+            // Verificar si la reserva existe antes de intentar eliminarla
+            Optional<BookHotel> optionalBookHotel = bookHotelRepository.findById(id);
+
+            if (optionalBookHotel.isPresent()) {
+                // Eliminar la reserva por su ID
+                bookHotelRepository.deleteById(id);
+            } else {
+                throw new EntityNotFoundException("No reservations found with ID: " + id);
+            }
+        } catch (Exception e) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+
+        }
+    }
+
+
     //Método para calcular el precio total
-    private Double calculateTotalPrice(int peopleQ, Double roomPrice) {
-        return peopleQ * roomPrice;
+    private Double calculateTotalPrice(int peopleQ, Double roomPrice, long numberOfDays) {
+        return peopleQ * roomPrice * numberOfDays;
     }
 
     // Método para obtener el precio de la habitación según el tipo de habitación y reservarla
@@ -115,5 +187,11 @@ public class HotelService implements IHotelService {
             return 0.0;
         }
     }
+
+    /*@Override
+    public List<Hotel> getHotelsByDateAndDestination(LocalDate dateFrom, LocalDate dateTo, String destination) {
+        return hotelRepository.findHotelsByDateAndDestination(dateFrom, dateTo, destination);
+
+    }*/
 
 }

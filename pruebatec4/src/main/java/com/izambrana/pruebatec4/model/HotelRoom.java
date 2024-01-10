@@ -1,9 +1,6 @@
 package com.izambrana.pruebatec4.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,13 +24,12 @@ public class HotelRoom {
     private double price;
     private boolean available;
 
-    @JsonBackReference
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "hotel_id")
     private Hotel hotel;
 
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
-    @JsonManagedReference
     private List<BookHotel> reservations;
 }

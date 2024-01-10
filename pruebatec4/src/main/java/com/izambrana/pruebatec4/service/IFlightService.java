@@ -16,7 +16,8 @@ public interface IFlightService {
     List<Flight> getFlightsByDateAndDestination(
             LocalDate dateFrom, LocalDate dateTo, String origin, String destination);
 
-    //Double bookFlight(BookFlight bookFlight);
     Double bookFlight(FlightBookingRequestDTO flightBookingRequest) throws Exception;
+
+    void deleteBookedFlight(Long id);
 }
 

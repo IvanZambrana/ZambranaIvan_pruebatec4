@@ -1,6 +1,6 @@
 package com.izambrana.pruebatec4.model;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,7 +23,7 @@ public class Hotel {
     private String name;
     private String city;
 
-    @JsonManagedReference
+    @JsonIgnore
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
     private List<HotelRoom> rooms;
 
