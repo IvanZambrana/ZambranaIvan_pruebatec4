@@ -9,10 +9,15 @@ import java.util.List;
 
 public interface IFlightService {
     public void saveFlight (Flight flight);
+
     public void saveFlightWithSeats(FlightWithSeatDTO flightWithSeatDTO);
+
     public List<Flight> getFlights();
+
     public Flight getFlightById(Long id);
+
     public void deleteFlight(Long id);
+
     List<Flight> getFlightsByDateAndDestination(
             LocalDate dateFrom, LocalDate dateTo, String origin, String destination);
 

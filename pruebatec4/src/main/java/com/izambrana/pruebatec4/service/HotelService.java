@@ -75,7 +75,7 @@ public class HotelService implements IHotelService {
                     boolean hasAvailableRooms = hotel.getRooms().stream()
                             .anyMatch(room -> room.isAvailable());
 
-                    if(hasAvailableRooms)
+                    if (hasAvailableRooms)
                         return hotel;
                     else
                         return null;
@@ -136,9 +136,10 @@ public class HotelService implements IHotelService {
         }
 
         bookHotelRepository.save(bookHotel);
+        List<User> guests = new ArrayList<>(bookHotel.getGuests());
 
         // Actualizar la relación bidireccional en la lista de hoteles de cada usuario
-        for (User guest : bookHotel.getGuests()) {
+        for (User guest : guests) {
             guest.getHotels().add(bookHotel);
             userRepository.save(guest);
         }
@@ -171,27 +172,9 @@ public class HotelService implements IHotelService {
         }
     }
 
-
     //Método para calcular el precio total
     private Double calculateTotalPrice(int peopleQ, Double roomPrice, long numberOfDays) {
         return peopleQ * roomPrice * numberOfDays;
     }
-
-    // Método para obtener el precio de la habitación según el tipo de habitación y reservarla
-    private Double getRoomPrice(String roomType) {
-        HotelRoom room = hotelRoomRepository.findFirstByRoomType(roomType);
-        room.setAvailable(false);
-        if (room != null) {
-            return room.getPrice();
-        } else {
-            return 0.0;
-        }
-    }
-
-    /*@Override
-    public List<Hotel> getHotelsByDateAndDestination(LocalDate dateFrom, LocalDate dateTo, String destination) {
-        return hotelRepository.findHotelsByDateAndDestination(dateFrom, dateTo, destination);
-
-    }*/
 
 }

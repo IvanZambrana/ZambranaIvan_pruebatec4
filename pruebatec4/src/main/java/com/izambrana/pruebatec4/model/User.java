@@ -17,7 +17,7 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     private String name;
     private String lastName;
@@ -25,7 +25,6 @@ public class User {
 
     @ManyToMany(mappedBy = "passengers", cascade = CascadeType.ALL)
     private List<BookFlight> bookFlights = new ArrayList<>();
-
 
 
     @ManyToMany(mappedBy = "guests", cascade = CascadeType.ALL)

@@ -103,7 +103,7 @@ public class FlightService implements IFlightService {
         //Establecer la relaciónbidireccional con pasajeros
         bookFlight.setPassengers(new ArrayList<>());
 
-        for (GuestDTO passenger: request.getPassengers()) {
+        for (GuestDTO passenger : request.getPassengers()) {
             User p = new User();
             p.setName(passenger.getName());
             p.setLastName(passenger.getLastName());

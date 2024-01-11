@@ -3,16 +3,13 @@ package com.izambrana.pruebatec4.controller;
 import com.izambrana.pruebatec4.dto.HotelWithRoomsDTO;
 import com.izambrana.pruebatec4.model.Hotel;
 import com.izambrana.pruebatec4.dto.HotelBookingRequestDTO;
-import com.izambrana.pruebatec4.repository.BookHotelRepository;
 import com.izambrana.pruebatec4.service.IHotelService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,11 +33,13 @@ public class HotelController {
         return "Hotel and rooms saved successfully";
     }
 
+    //Mostrar hotel por ID
     @GetMapping("/hotels/{id}")
     public Hotel getHotelById(@PathVariable Long id) {
         return hotelService.getHotelById(id);
     }
 
+    //Editar datos de un hotel
     @PutMapping("/hotels/edit/{id}")
     public Hotel editHotel(@PathVariable Long id,
                            @RequestParam String hotelCode,
